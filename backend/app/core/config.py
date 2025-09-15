@@ -1,6 +1,7 @@
 from typing import List, Optional
-from pydantic import BaseSettings, AnyHttpUrl, validator
-import os
+
+from pydantic import AnyHttpUrl, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     # API设置
@@ -10,7 +11,7 @@ class Settings(BaseSettings):
     # CORS设置
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
     
-    @validator("BACKEND_CORS_ORIGINS", pre=True)
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     def assemble_cors_origins(cls, v: str | List[str]) -> List[str] | str:
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
@@ -40,8 +41,6 @@ class Settings(BaseSettings):
     TTS_SERVICE_URL: Optional[str] = None
     TTS_API_KEY: Optional[str] = None
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
 settings = Settings()
